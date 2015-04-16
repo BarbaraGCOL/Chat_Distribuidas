@@ -48,15 +48,9 @@ public class Servidor extends Thread {
         }
         CLIENTES.remove(this.nomeCliente);
         System.out.println(this.nomeCliente + " saiu do bate-papo!");
-        //String[] out = {" do bate-papo!"};
+
         mensagem = new JSONObject();
-        formaJSON("MENSAGEM", "DESLOGADO");
-        send(saida, mensagem.toString());
-        try {
-            getConexao().close();
-        } catch (IOException ex) {
-            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        send(saida, getNomeCliente()+" SAIU");
     }
     
     /**
@@ -118,18 +112,23 @@ public class Servidor extends Thread {
                         break;
                     case "ENVIAR":
                         msg = (json.get("MENSAGEM")).toString();
-                        send(saida, msg);
+                        send(saida, this.nomeCliente +" disse: "+ msg);
                         break;    
                     case "LISTAR":
                     	listaUsuarios(saida);
                         break;
                     case "SAIR":
                         logoff(getNomeCliente(), saida);
+                        try {
+                            getConexao().close();
+                        } catch (IOException ex) {
+                            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                         break;
                     default:
                         break;
                 }
-            }while(!operacao.equals("DESLOGAR"));
+            }while(!operacao.equals("SAIR"));
         
         } catch (IOException e) {
             System.out.println("Falha na Conexao... .. ." + " IOException: " + e);
@@ -151,7 +150,7 @@ public class Servidor extends Thread {
             
             if (chat != saida) {
             	mensagem = new JSONObject();
-            	formaJSON("MENSAGEM", this.nomeCliente +" disse: "+ msg);
+            	formaJSON("MENSAGEM", msg);
             	chat.println(mensagem.toString());
             }
         }

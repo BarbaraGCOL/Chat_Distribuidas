@@ -23,6 +23,11 @@ public class Cliente extends Thread {
             PrintStream saida = new PrintStream(socket.getOutputStream());
             BufferedReader teclado = new BufferedReader(new InputStreamReader(System.in));
            
+            System.out.println("==============================================================================");
+            System.out.println("========================== CHAT MULTIUSUÁRIOS TCP ============================");
+            System.out.println("DIGITE ~LISTAR para visualizar os usuários logados, ou ~SAIR para fazer LOGOFF");
+            System.out.println("==============================================================================");
+            
             System.out.print("Digite seu nome: ");
             String meuNome = teclado.readLine();
             
@@ -35,9 +40,8 @@ public class Cliente extends Thread {
             
             while (true)
             {
-                System.out.print(" > ");
                 try
-                {
+                {	
                 	texto = teclado.readLine();
                     JSONObject mensagem = new JSONObject();
                     
@@ -50,9 +54,10 @@ public class Cliente extends Thread {
                     	}
                     	else {
                     		mensagem.put("OPERACAO", "ENVIAR");
+                    		mensagem.put("MENSAGEM", texto);
+                    		System.out.println("VOCÊ disse: " + texto);
                     	}
-                    	
-                    mensagem.put("MENSAGEM", texto);
+                    
                     saida.println(mensagem.toString());
                 }
                 catch (Exception e)
@@ -74,24 +79,29 @@ public class Cliente extends Thread {
                 new BufferedReader(new InputStreamReader(this.conexao.getInputStream()));
             
             String msg = "";
+            String in;
             while (true)
             {
-                // pega o que o servidor enviou
-            	try {
-					JSONObject json = new JSONObject(entrada.readLine());
-					msg = json.get("MENSAGEM").toString();
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-            	
-                System.out.println(msg);
-                
-                if (msg == "DESLOGADO") {
+            	in = entrada.readLine();
+                if (in == null) {
                     System.exit(0);
                 }
                 else {
-                	System.out.print(" > ");
+                	// pega o que o servidor enviou
+                	try {
+    					JSONObject json = new JSONObject(in);
+    					msg = json.get("MENSAGEM").toString();
+    				} catch (JSONException e) {
+    					e.printStackTrace();
+    				}
+                	if(msg == "DESLOGADO") {
+                		System.exit(0);
+                	}
+                	else {
+//                		System.out.println();
+                        System.out.println(msg);
+//                        System.out.print(" > ");
+                	}
                 }
             }
         } catch (IOException e) {
