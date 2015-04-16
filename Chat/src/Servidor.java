@@ -16,6 +16,8 @@ public class Servidor extends Thread {
     private Socket conexao;
     private String nomeCliente;
     private static final List<String> CONECTADOS = new ArrayList<>();
+    private JSONObject json = null;
+    JSONObject mensagem = null;
     
     public Servidor(Socket socket) {
         this.conexao = socket;
@@ -46,8 +48,10 @@ public class Servidor extends Thread {
         }
         CLIENTES.remove(this.nomeCliente);
         System.out.println(this.nomeCliente + " saiu do bate-papo!");
-        String[] out = {" do bate-papo!"};
-        send(saida, out[0]);
+        //String[] out = {" do bate-papo!"};
+        mensagem = new JSONObject();
+        formaJSON("MENSAGEM", "DESLOGADO");
+        send(saida, mensagem.toString());
         try {
             getConexao().close();
         } catch (IOException ex) {
@@ -60,16 +64,10 @@ public class Servidor extends Thread {
      * @param saida 
      */
     public void listaUsuarios(PrintStream saida){
-        try
-        {
-            JSONObject mensagem = new JSONObject();
-            mensagem.put("OPERACAO", "LISTAR");
-            mensagem.put("MENSAGEM", CONECTADOS.size() + " usuários conectados: " + CONECTADOS.toString());
+        	mensagem = new JSONObject();
+        	formaJSON("OPERACAO", "LISTAR");
+        	formaJSON("MENSAGEM", CONECTADOS.size() + " usuários conectados: " + CONECTADOS.toString());
             saida.println(mensagem.toString());
-        }
-		catch (Exception e)
-		{
-		}
     }
     
     public static void rodarServer(int porta){
@@ -98,8 +96,6 @@ public class Servidor extends Thread {
             BufferedReader entrada = 
                 new BufferedReader(new InputStreamReader(this.conexao.getInputStream()));
             PrintStream saida = new PrintStream(this.conexao.getOutputStream());
-            
-            JSONObject json = null;
             
             String operacao = "";
           
@@ -133,7 +129,7 @@ public class Servidor extends Thread {
                     default:
                         break;
                 }
-            }while(!operacao.equals("SAIR"));
+            }while(!operacao.equals("DESLOGAR"));
         
         } catch (IOException e) {
             System.out.println("Falha na Conexao... .. ." + " IOException: " + e);
@@ -141,6 +137,7 @@ public class Servidor extends Thread {
             Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
     /**
      * 
      * @param saida
@@ -153,7 +150,9 @@ public class Servidor extends Thread {
             PrintStream chat = cliente.getValue();
             
             if (chat != saida) {
-                chat.println(this.nomeCliente +" disse: "+ msg);
+            	mensagem = new JSONObject();
+            	formaJSON("MENSAGEM", this.nomeCliente +" disse: "+ msg);
+            	chat.println(mensagem.toString());
             }
         }
     }
@@ -179,6 +178,16 @@ public class Servidor extends Thread {
         CLIENTES.put(this.nomeCliente, saida);
             
         return true;
+    }
+    
+    public void formaJSON(String chave, String valor) {
+    	try
+        {
+            mensagem.put(chave, valor);
+        }
+		catch (Exception e)
+		{
+		}
     }
     
     public String getNomeCliente() {

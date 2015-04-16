@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Cliente extends Thread {
@@ -43,7 +45,7 @@ public class Cliente extends Thread {
                     	mensagem.put("OPERACAO", "LISTAR");
                     }
                     else
-                    	if(texto.equals("~SAIR")) {
+                    	if(texto.equals("~DESLOGAR")) {
                     		mensagem.put("OPERACAO", "SAIR");
                     	}
                     	else {
@@ -61,6 +63,7 @@ public class Cliente extends Thread {
             System.out.println("Falha na Conexao... .. ." + " IOException: " + e);
         }
     }
+    
     // execução da thread
     @Override
     public void run()
@@ -70,19 +73,26 @@ public class Cliente extends Thread {
             BufferedReader entrada = 
                 new BufferedReader(new InputStreamReader(this.conexao.getInputStream()));
             
-            String msg;
+            String msg = "";
             while (true)
             {
                 // pega o que o servidor enviou
-                msg = entrada.readLine();
-            
-                if (msg == null) {
-                    System.out.println("CONEXÃO ENCERRADA!");
+            	try {
+					JSONObject json = new JSONObject(entrada.readLine());
+					msg = json.get("MENSAGEM").toString();
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	
+                System.out.println(msg);
+                
+                if (msg == "DESLOGADO") {
                     System.exit(0);
                 }
-//                System.out.println();
-                System.out.println(msg);
-                System.out.print(" > ");
+                else {
+                	System.out.print(" > ");
+                }
             }
         } catch (IOException e) {
             System.out.println("Ocorreu uma Falha... .. ." + 
