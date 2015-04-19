@@ -49,7 +49,7 @@ public class Cliente extends Thread {
                     	mensagem.put("OPERACAO", "LISTAR");
                     }
                     else
-                    	if(texto.equals("~DESLOGAR")) {
+                    	if(texto.equals("~SAIR")) {
                     		mensagem.put("OPERACAO", "SAIR");
                     	}
                     	else {

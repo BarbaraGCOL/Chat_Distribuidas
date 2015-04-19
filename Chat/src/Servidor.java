@@ -26,10 +26,10 @@ public class Servidor extends Thread {
     /**
      * Faz login do cliente
      * @param newName 
-     * @return true se jÃ¡ existe usuÃ¡rio logado com o respectivo nome
+     * @return true se já existe usuário logado com o respectivo nome
      */
     public boolean verificaLogin(String newName) {
-        // Verifica se jÃ¡ existe usuÃ¡rio logado com esse nome
+        // Verifica se já existe usuário logado com esse nome
         if (CONECTADOS.stream().anyMatch((nome) -> (nome.equals(newName)))) {
             return true;
         }
